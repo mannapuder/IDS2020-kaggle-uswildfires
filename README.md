@@ -1,0 +1,1 @@
+# IDS2020-kaggle-uswildfires

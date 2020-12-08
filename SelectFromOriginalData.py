@@ -3,6 +3,8 @@ import os
 import pandas as pd
 import sqlite3
 import tarfile
+import sklearn.neighbors
+import numpy as np
 
 stationnames = []
 desiredelements= (b"PRCP", b"TMAX", b"TMIN", b"TAVG", b"WT03", b"WV03")
@@ -43,14 +45,21 @@ with open("./data/weather.csv", "w") as resultfile:
                                 resultfile.write(str(info))
                         resultfile.write("\n")
 with sqlite3.connect("./data/FPA_FOD_20170508.sqlite") as conn:
-    pd.read_sql("select FIRE_YEAR, DISCOVERY_DOY, DISCOVERY_DATE, STAT_CAUSE_CODE, STAT_CAUSE_DESCR, LATITUDE, LONGITUDE, STATE from Fires", con=conn).to_csv("./data/fires.csv", index=False)
+    fires = pd.read_sql("select FIRE_YEAR, DISCOVERY_DOY, DISCOVERY_DATE, STAT_CAUSE_CODE, STAT_CAUSE_DESCR, LATITUDE, LONGITUDE, STATE from Fires", con=conn)
 stations = pd.read_fwf("https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt", colspecs=[(0,11),(12,20),(21,30)], names=["Station","Latitude","Longitude"])
 stations = stations[stations["Station"].isin(stationnames)]
 stations.to_csv("./data/stations.csv", index=False)
+knn1 = sklearn.neighbors.KNeighborsClassifier(n_neighbors=1, metric="haversine").fit(np.radians(stations[["Latitude","Longitude"]]), stations.Station)
+fires["NEAREST_STATION"] = knn1.predict(np.radians(fires[["LATITUDE", "LONGITUDE"]]))
+fires["STATION_DISTANCE"] = fires.apply(
+    lambda x: sklearn.neighbors.DistanceMetric.get_metric("haversine").pairwise(
+        X=[[np.math.radians(x["LATITUDE"]), np.math.radians(x["LONGITUDE"])]],
+        Y=[[np.math.radians(stations[stations.Station==x["NEAREST_STATION"]]["Latitude"]),np.math.radians(stations[stations.Station==x["NEAREST_STATION"]]["Longitude"])]])[0][0]* 6371, axis=1)
+fires.to_csv("./data/fires.csv", index=False)
 with tarfile.open("./data/data.tar.xz","w:xz") as result:
-    result.add("./data/weather.csv")
-    result.add("./data/fires.csv")
-    result.add("./data/stations.csv")
+    result.add("./data/weather.csv", arcname="weather.csv")
+    result.add("./data/fires.csv", arcname="fires.csv")
+    result.add("./data/stations.csv", arcname="stations.csv")
 os.remove("./data/weather.csv")
 os.remove("./data/fires.csv")
 os.remove("./data/stations.csv")

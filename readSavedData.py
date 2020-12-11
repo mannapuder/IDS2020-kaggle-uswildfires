@@ -40,7 +40,7 @@ def readstations():
 
 def readfires():
     with tarfile.open("./data/data.tar.xz", "r:xz") as datafile:
-        fires = pd.read_csv(datafile.extractfile("fires.csv"))
+        fires = pd.read_csv(datafile.extractfile("fires.csv"),dtype={"STAT_CAUSE_CODE":"uint8"})
         epoch = pd.to_datetime(0, unit='s').to_julian_date()
         fires.DISCOVERY_DATE = pd.to_datetime(fires.DISCOVERY_DATE-epoch, unit="D")
         return fires

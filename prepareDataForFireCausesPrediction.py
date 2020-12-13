@@ -22,7 +22,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 
-def prepareDataForCausesPrediction(feature_scaling=False):
+def prepareDataForCausesPrediction():
     pd.set_option("display.max_columns", 24)
     
     data = rd.merge()    
@@ -62,40 +62,50 @@ def prepareDataForCausesPrediction(feature_scaling=False):
     data['WT03'] = data['WT03'].fillna(0)
     data['WV03'] = data['WV03'].fillna(0)
     
-    '''
-    # Balancing the dataset by undersampling
-    # Debris burning
-    tmp = data[data["STAT_CAUSE_CODE"] == 5].sample(230000, random_state=0) # reduces the instances of debris burning to 230 000
-    tmp2 = data[data["STAT_CAUSE_CODE"] != 5]
-    data = pd.concat([tmp, tmp2])
-    # Miscellaneous
-    tmp = data[data["STAT_CAUSE_CODE"] == 9].sample(230000, random_state=0)
-    tmp2 = data[data["STAT_CAUSE_CODE"] != 9]
-    data = pd.concat([tmp, tmp2])
-    '''
-    
-    # Feature scaling
-    if (feature_scaling):
-        print("Feature scaling...")
-        minMaxScaler = MinMaxScaler()
-        data[["FIRE_YEAR", "DISCOVERY_DOY", "LATITUDE", "LONGITUDE", "PRCP", "TMAX", "TMIN"]] = minMaxScaler.fit_transform(data[["FIRE_YEAR", "DISCOVERY_DOY", "LATITUDE", "LONGITUDE", "PRCP", "TMAX", "TMIN"]])
-        
     
     data_dum = pd.get_dummies(data, columns=data.select_dtypes(include=["object"]).columns)
     print("Data shape: " + str(data_dum.shape))
-    return data_dum
+    
+    train, test = train_test_split(data_dum, test_size=0.2, random_state=0)
+    # Balancing the dataset by undersampling
+    '''
+    print("Balancing train data...")
+    # Debris burning
+    tmp = train[train["STAT_CAUSE_CODE"] == 5].sample(185000, random_state=0) # reduces the instances of debris burning to 185 000
+    tmp2 = train[train["STAT_CAUSE_CODE"] != 5]
+    train = pd.concat([tmp, tmp2])
+    # Miscellaneous
+    tmp = train[train["STAT_CAUSE_CODE"] == 9].sample(185000, random_state=0)
+    tmp2 = train[train["STAT_CAUSE_CODE"] != 9]
+    train = pd.concat([tmp, tmp2])
+    '''
+    
+    # Feature scaling
+    print("Feature scaling...")
+    minMaxScaler = MinMaxScaler()
+    minMaxScaler.fit(train[["FIRE_YEAR", "DISCOVERY_DOY", "LATITUDE", "LONGITUDE", "PRCP", "TMAX", "TMIN"]])
+    train[["FIRE_YEAR", "DISCOVERY_DOY", "LATITUDE", "LONGITUDE", "PRCP", "TMAX", "TMIN"]] = minMaxScaler.transform(train[["FIRE_YEAR", "DISCOVERY_DOY", "LATITUDE", "LONGITUDE", "PRCP", "TMAX", "TMIN"]])
+    test[["FIRE_YEAR", "DISCOVERY_DOY", "LATITUDE", "LONGITUDE", "PRCP", "TMAX", "TMIN"]] = minMaxScaler.transform(test[["FIRE_YEAR", "DISCOVERY_DOY", "LATITUDE", "LONGITUDE", "PRCP", "TMAX", "TMIN"]])
+
+    
+    return train, test
 
 
-def testModels(normalize_features=False):
+def testModels():
 
     # For testing
     print("Testing models...")
     sampleSize = 100000    
     
-    data_dum = prepareDataForCausesPrediction(feature_scaling=normalize_features).sample(sampleSize) # for testing, otherwise some models run for hours
-    X_train, X_test, y_train, y_test = train_test_split(data_dum.drop(columns=["STAT_CAUSE_CODE"]), data_dum["STAT_CAUSE_CODE"], test_size=0.2, random_state=0)
+    train, test = prepareDataForCausesPrediction()
+    train = train.sample(10000, random_state=0) # reducing the train set size (to save time)
+    X_train = train.drop(columns=["STAT_CAUSE_CODE"])
+    y_train = train["STAT_CAUSE_CODE"]
+    X_test = test.drop(columns=["STAT_CAUSE_CODE"])
+    y_test = test["STAT_CAUSE_CODE"]
     
     print("Testing on sample with size " + str(sampleSize) + "...")
+
     
     print("Testing decision tree...")
     decisonTree = tree.DecisionTreeClassifier(criterion='entropy', random_state=0).fit(X_train, y_train)
@@ -121,16 +131,19 @@ def testModels(normalize_features=False):
     #y_pred = grad.predict(X_test)
     #print("Accuracy: ", str(accuracy_score(y_test, y_pred))) 
     
+    '''
     print("Testing StackingClassifier...")
     estimators = [('rf', RandomForestClassifier()), ('knn', KNeighborsClassifier(n_neighbors = 20, n_jobs=-1))]
     stacking = StackingClassifier(estimators=estimators, n_jobs=-1).fit(X_train, y_train)
     y_pred = stacking.predict(X_test)
     print("Accuracy: ", str(accuracy_score(y_test, y_pred)))
         
+    '''
+    
     #svm_poly = SVC(kernel="poly", degree=2).fit(X_train, y_train)
     #y_pred = svm_poly.predict(X_test)
     #print("\nSVM poly")
     #print("Accuracy: ", str(accuracy_score(y_test, y_pred)))
     
 
-#testModels(True)
+#testModels()

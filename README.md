@@ -16,19 +16,19 @@ Contains 1880465 rows of data with the following features:
 1. STATION_DISTANCE: haversine distance in kilometers to the nearest_station.
 
 #### Cause Code - Cause Description:
-1 - Lightning
-2 - Equipment Use
-3 - Smoking
-4 - Campfire
-5 - Debris Burning
-6 - Railroad
-7 - Arson
-8 - Children
-9 - Miscellaneous
-10 - Fireworks
-11 - Powerline
-12 - Structure
-13 - Missing/Undefined
+* 1 - Lightning
+* 2 - Equipment Use
+* 3 - Smoking
+* 4 - Campfire
+* 5 - Debris Burning
+* 6 - Railroad
+* 7 - Arson
+* 8 - Children
+* 9 - Miscellaneous
+* 10 - Fireworks
+* 11 - Powerline
+* 12 - Structure
+* 13 - Missing/Undefined
 ### stations.csv:
 Information about the HCN station locations:
 1. Station: station identification code.

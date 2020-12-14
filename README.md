@@ -91,15 +91,16 @@ File for optimizing the choice of hyperparameters for a random forest. Contains 
 ### createModel.py:
 File for creating the final model. Reads in and merges the fire and weather data, cleans and scales it following the steps given in prepareDataForFireCausesPrediction.py, trains a random forest (with "gini" criterion) with the best hyperparameters found with fineTuneRandomForest.py (n_estimators=100,  max_features='sqrt', max_depth=70, min_samples_leaf=2, min_samples_split=5) and writes the created model to file final_model.model, the used scaler to minMaxScaler.scaler and the used encoder to labelencoder.le, which can be read by using Python's pickle module's load() function.
 ### graphs.py:
-File for creating visualisations of the fires dataset with pyplot. Contains the following functions:
+File for creating visualisations of the fires dataset with pyplot. Contains the following functions (which all use the dataframe from the function readfires()):
 1. fires_by_year(): Creates a bar plot of the number of wildfires per year and saves it to visuals/fires_by_year.png
-1. fires_by_causes_and_years(): Creates a line graph of the number of fires per year grouped by causes and saves it to visuals/fires_by_causes.png
-1. fires_by_causes(): Creates a bar plot of the number of fires per cause.
+1. fires_by_causes_and_years(): Creates a line graph of the number of fires per year grouped by causes and saves it to visuals/fires_by_causes_and_years.png
+1. fires_by_causes(): Creates a bar plot of the number of fires per cause and saves it to visuals/fires_by_causes.png
 ### heatmaps.py:
-File for creating geographical map type visualisations of the fires dataset. Contains the following functions:
+File for creating geographical map type visualisations of the fires dataset. Contains the following functions (which all use the dataframe from the function readfires()):
 1. heatmap_by_states(): Creates a heatmap of the number of fires in each state and saves it to visuals/heatmap_by_states.png.
 1. heatmap_human_cause(): Creates a heatmap of the number of fires caused by human activity in each state and saves it to visuals/heatmap_human_cause.png
 1. heatmap_lightning(): Creates a heatmap of the number of fires caused by lightning in each state and saves it to visuals/heatmap_lightning.png
+All the heatmaps also have an interactive version in the form of an html file by the same name as the static image.
 ## Model creation:
 1. Ensure the data folder contains data.tar.xz file
 1. Run createModel.py

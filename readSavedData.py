@@ -34,9 +34,11 @@ def readweather():
         weather.DATE = pd.to_datetime(weather.DATE, format="%Y%m%d")
         return weather
 
+
 def readstations():
     with tarfile.open("./data/data.tar.xz", "r:xz") as datafile:
         return pd.read_csv(datafile.extractfile("stations.csv"))
+
 
 def readfires():
     with tarfile.open("./data/data.tar.xz", "r:xz") as datafile:
@@ -45,5 +47,7 @@ def readfires():
         fires.DISCOVERY_DATE = pd.to_datetime(fires.DISCOVERY_DATE-epoch, unit="D")
         return fires
 
+
 def merge(weather=readweather(), fires=readfires()):
     return fires.merge(weather, how="left", left_on=["NEAREST_STATION","DISCOVERY_DATE"], right_on=["STATION","DATE"])
+

@@ -1,25 +1,20 @@
-import pandas as pd
-import numpy as np
-import tarfile
-import matplotlib.pyplot as plt
-from sklearn.linear_model import LinearRegression
-import seaborn as sns
 from readSavedData import readfires
 import plotly.graph_objects as go
+
 
 def heatmap_by_states():
     fire_counts = data["STATE"].value_counts()
 
-    fig = go.Figure(data = go.Choropleth(
+    fig = go.Figure(data=go.Choropleth(
         locations=fire_counts.index,
-        z = fire_counts.values,
+        z=fire_counts.values,
         locationmode="USA-states",
-        colorbar_title = "Number of wildfires",
+        colorbar_title="Number of wildfires",
         colorscale='reds'
     ))
 
     fig.update_layout(
-        title_text = "Wildfires by State 1992-2015",
+        title_text="Wildfires by State 1992-2015",
         title_x=0.5,
         title_y=0.8,
         geo_scope='usa'
@@ -28,10 +23,53 @@ def heatmap_by_states():
     fig.write_image("./Visuals/heatmap_by_states.png", scale=2)
 
 
-def heatmap_by_coordinates():
-    pass
+def heatmap_human_cause():
+    relevant_data = data[["STATE", "STAT_CAUSE_CODE", "STAT_CAUSE_DESCR"]]
+    cause_data = relevant_data[relevant_data["STAT_CAUSE_CODE"] != 1]
+    fire_counts = cause_data["STATE"].value_counts()
+
+    fig = go.Figure(data=go.Choropleth(
+            locations=fire_counts.index,
+            z=fire_counts.values,
+            locationmode="USA-states",
+            colorbar_title="Number of wildfires",
+            colorscale='reds'
+        ))
+
+    fig.update_layout(
+        title_text="Wildfires started from human cause by State 1992-2015",
+        title_x=0.5,
+        title_y=0.8,
+        geo_scope='usa'
+    )
+
+    fig.write_image("./Visuals/heatmap_human_cause.png", scale=2)
 
 
-data=readfires()
+def heatmap_lightning():
+    relevant_data = data[["STATE", "STAT_CAUSE_CODE", "STAT_CAUSE_DESCR"]]
+    lightning_data = relevant_data[relevant_data["STAT_CAUSE_CODE"] == 1]
+    fire_counts=lightning_data["STATE"].value_counts()
 
-heatmap_by_states()
+    fig = go.Figure(data=go.Choropleth(
+        locations=fire_counts.index,
+        z=fire_counts.values,
+        locationmode="USA-states",
+        colorbar_title="Number of wildfires",
+        colorscale='reds'
+    ))
+
+    fig.update_layout(
+        title_text="Wildfires caused by lightning by State 1992-2015",
+        title_x=0.5,
+        title_y=0.8,
+        geo_scope='usa'
+    )
+
+    fig.write_image("./Visuals/heatmap_lightning.png", scale=2)
+
+
+data = readfires()
+heatmap_human_cause()
+heatmap_lightning()
+

@@ -56,7 +56,6 @@ data['WV03'] = data['WV03'].fillna(0)
 
 le = LabelEncoder()
 data["STATE"] = le.fit_transform(data["STATE"])
-data = data.sample(10000)
 
  # Feature scaling
 print("Feature scaling...")

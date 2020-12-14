@@ -98,7 +98,7 @@ def testModels():
     sampleSize = 100000    
     
     train, test = prepareDataForCausesPrediction()
-    train = train.sample(10000, random_state=0) # reducing the train set size (to save time)
+    train = train.sample(sampleSize, random_state=0) # reducing the train set size (to save time)
     X_train = train.drop(columns=["STAT_CAUSE_CODE"])
     y_train = train["STAT_CAUSE_CODE"]
     X_test = test.drop(columns=["STAT_CAUSE_CODE"])

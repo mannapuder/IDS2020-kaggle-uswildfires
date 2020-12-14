@@ -19,6 +19,7 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.ensemble import StackingClassifier
 from sklearn.svm import SVC
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import LabelEncoder
 
 
 
@@ -33,7 +34,6 @@ def prepareDataForCausesPrediction():
     data = data.drop(data[data["STATION_DISTANCE"] > 100].index)
     
     # Removing irrelevant columns
-    # Maybe station distance is relevant?
     data = data.drop(columns=["STAT_CAUSE_DESCR", "NEAREST_STATION", "STATION_DISTANCE", "STATION", "DATE", "DISCOVERY_DATE"])
     
     
@@ -62,11 +62,13 @@ def prepareDataForCausesPrediction():
     data['WT03'] = data['WT03'].fillna(0)
     data['WV03'] = data['WV03'].fillna(0)
     
+    le = LabelEncoder()
+    data["STATE"] = le.fit_transform(data["STATE"])
     
-    data_dum = pd.get_dummies(data, columns=data.select_dtypes(include=["object"]).columns)
-    print("Data shape: " + str(data_dum.shape))
     
-    train, test = train_test_split(data_dum, test_size=0.2, random_state=0)
+    print("Data shape: " + str(data.shape))
+    
+    train, test = train_test_split(data, test_size=0.2, random_state=0)
     # Balancing the dataset by undersampling
     '''
     print("Balancing train data...")

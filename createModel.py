@@ -4,7 +4,9 @@
 Created on Mon Dec 14 01:50:18 2020
 
 Importing the model: model = pickle.load(open("final_model.model", "rb"))
-
+To prepare the data it might be neccessary to import minMaxScaler and labelEncoder as well:
+minMaxScaler = pickle.load(open("minMaxScaler.scaler", "rb"))
+labelEncoder = pickle.load(open("labelencoder.le", "rb"))
 @author: andre
 """
 print("Importing data...")
@@ -12,6 +14,7 @@ import pandas as pd
 import readSavedData as rd
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import LabelEncoder
 import pickle
 
 
@@ -23,7 +26,6 @@ print("Cleaning up the data...")
 data = data.drop(data[data["STATION_DISTANCE"] > 100].index)
 
 # Removing irrelevant columns
-# Maybe station distance is relevant?
 data = data.drop(columns=["STAT_CAUSE_DESCR", "NEAREST_STATION", "STATION_DISTANCE", "STATION", "DATE", "DISCOVERY_DATE"])
 
 
@@ -52,19 +54,21 @@ data = data.drop(data[data["STAT_CAUSE_CODE"] == 13].index)
 data['WT03'] = data['WT03'].fillna(0)
 data['WV03'] = data['WV03'].fillna(0)
 
-
-data_dum = pd.get_dummies(data, columns=data.select_dtypes(include=["object"]).columns)
+le = LabelEncoder()
+data["STATE"] = le.fit_transform(data["STATE"])
 
  # Feature scaling
 print("Feature scaling...")
 minMaxScaler = MinMaxScaler()
-data_dum[["FIRE_YEAR", "DISCOVERY_DOY", "LATITUDE", "LONGITUDE", "PRCP", "TMAX", "TMIN"]] = minMaxScaler.fit_transform(data_dum[["FIRE_YEAR", "DISCOVERY_DOY", "LATITUDE", "LONGITUDE", "PRCP", "TMAX", "TMIN"]])
+data[["FIRE_YEAR", "DISCOVERY_DOY", "LATITUDE", "LONGITUDE", "PRCP", "TMAX", "TMIN"]] = minMaxScaler.fit_transform(data[["FIRE_YEAR", "DISCOVERY_DOY", "LATITUDE", "LONGITUDE", "PRCP", "TMAX", "TMIN"]])
 
 print("Creating the model...")
-data_x = data_dum.drop(columns=["STAT_CAUSE_CODE"])
-data_y = data_dum["STAT_CAUSE_CODE"]
+data_x = data.drop(columns=["STAT_CAUSE_CODE"])
+data_y = data["STAT_CAUSE_CODE"]
 rf = RandomForestClassifier(criterion="gini", n_jobs=-1, n_estimators=100, max_features='sqrt', max_depth=70, min_samples_leaf=2, min_samples_split=5)
 rf.fit(data_x, data_y)
 pickle.dump(rf, open("final_model.model", "wb"))
+pickle.dump(le, open("labelencoder.le", "wb"))
+pickle.dump(minMaxScaler, open("minMaxScaler.scaler", "wb"))
 
 

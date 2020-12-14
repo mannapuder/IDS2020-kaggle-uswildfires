@@ -21,6 +21,7 @@ def heatmap_by_states():
     )
 
     fig.write_image("./Visuals/heatmap_by_states.png", scale=2)
+    fig.write_html("./Visuals/heatmap_by_states.html")
 
 
 def heatmap_human_cause():
@@ -33,7 +34,7 @@ def heatmap_human_cause():
             z=fire_counts.values,
             locationmode="USA-states",
             colorbar_title="Number of wildfires",
-            colorscale='reds'
+            colorscale='purples'
         ))
 
     fig.update_layout(
@@ -44,6 +45,7 @@ def heatmap_human_cause():
     )
 
     fig.write_image("./Visuals/heatmap_human_cause.png", scale=2)
+    fig.write_html("./Visuals/heatmap_human_cause.html")
 
 
 def heatmap_lightning():
@@ -56,7 +58,7 @@ def heatmap_lightning():
         z=fire_counts.values,
         locationmode="USA-states",
         colorbar_title="Number of wildfires",
-        colorscale='reds'
+        colorscale='teal'
     ))
 
     fig.update_layout(
@@ -67,9 +69,9 @@ def heatmap_lightning():
     )
 
     fig.write_image("./Visuals/heatmap_lightning.png", scale=2)
+    fig.write_html("./Visuals/heatmap_lightning.html")
 
 
 data = readfires()
-heatmap_human_cause()
-heatmap_lightning()
+heatmap_by_states()
 
